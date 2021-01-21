@@ -15,11 +15,10 @@
 <body class="bg-light" onload="get_issues()">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
   <script language="javascript">
+let query =
+            "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc+archived%3Afalse";
+let url = "https://api.github.com/search/issues?" + query;
 async function get_issues() {
-    let query =
-                "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc+archived%3Afalse";
-    let url =
-           "https://api.github.com/search/issues?" + query;
     let response = await fetch(url);
 
     if (response.ok) {
@@ -33,23 +32,27 @@ async function get_issues() {
             let url_comps = item.repository_url.split("/").reverse();
             let repo = url_comps[1] + "/" + url_comps[0];
             info.innerHTML = "<strong>" + item.user.login
-                      + "</strong> for <a href=\"https://github.com/" + repo + "\">"
+                      + "</strong> for <a href=\"https://github.com/" + repo
+                      + "\" class=\"text-decoration-none\">"
                       + repo + "</a>";
             li.appendChild(info);
 
             var title = document.createElement("p");
-            title.innerHTML = "<a href=\"" + item.html_url + "\">#" + item.id
-                      + "</a> " + item.title;
+            title.innerHTML = "<a href=\"" + item.html_url + "\">#"
+                      + item.number + "</a><a href=\"" + item.html_url
+                      + "\" class=\"text-reset text-decoration-none\"> "
+                      + item.title + "</a>";
             li.appendChild(title);
 
             var labels = document.createElement("p");
-            labels.innerHTML = "Created: "
+            labels.innerHTML = "<small>Created: "
                       + item.created_at.replace("T", " ").replace("Z", " UTC")
                       + ", updated: "
-                      + item.updated_at.replace("T", " ").replace("Z", " UTC");
+                      + item.updated_at.replace("T", " ").replace("Z", " UTC")
+                      + "</small>";
             for (let lbl of item.labels) {
                 if (lbl.name != "ok-to-test") {
-                    labels.innerHTML += ", <span style=\"color:#"
+                    labels.innerHTML += ", <span class=\"small\" style=\"color:#"
                               + lbl.color + "\">"
                               + lbl.name + "</span>";
                 }
