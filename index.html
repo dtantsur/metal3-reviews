@@ -15,9 +15,65 @@
 <body class="bg-light" onload="get_issues()">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
   <script language="javascript">
-let query =
-            "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc+archived%3Afalse";
+let query = "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc+archived%3Afalse";
 let url = "https://api.github.com/search/issues?" + query;
+
+function render_item_heading(item) {
+    var info = document.createElement("p");
+    let url_comps = item.repository_url.split("/").reverse();
+    let repo = url_comps[1] + "/" + url_comps[0];
+    info.innerHTML = "<strong>" + item.user.login
+              + "</strong> for <a href=\"https://github.com/" + repo
+              + "\" class=\"text-decoration-none\">"
+              + repo + "</a>";
+    return info;
+}
+
+function render_item_link(item) {
+    var text = item.title;
+    let match = text.match(/^Bug #?([0-9]+): ?(.*)/);
+    if (match) {
+        text = match[2];
+    }
+
+    var title = document.createElement("p");
+    title.innerHTML = "<a href=\"" + item.html_url + "\">#"
+              + item.number + "</a><a href=\"" + item.html_url
+              + "\" class=\"text-reset text-decoration-none\"> "
+              + text + "</a>";
+    if (match) {
+        title.innerHTML += " <a class=\"small text-muted\" href=\""
+              + "https://bugzilla.redhat.com/show_bug.cgi?id="
+              + match[1] + "\">[Bugzilla: " + match[1] + "]</a>";
+    }
+    return title;
+}
+
+function render_item_extras(item) {
+    var extras = document.createElement("p");
+    extras.innerHTML = "<small>Created: "
+              + item.created_at.replace("T", " ").replace("Z", " UTC")
+              + ", updated: "
+              + item.updated_at.replace("T", " ").replace("Z", " UTC")
+              + "</small>";
+    for (let lbl of item.labels) {
+        if (lbl.name != "ok-to-test") {
+            extras.innerHTML += ", <span class=\"small\" style=\"color:#"
+                      + lbl.color + "\">"
+                      + lbl.name + "</span>";
+        }
+    }
+    return extras;
+}
+
+function render_item(item) {
+    var li = document.createElement("li");
+    li.appendChild(render_item_heading(item));
+    li.appendChild(render_item_link(item));
+    li.appendChild(render_item_extras(item));
+    return li;
+}
+
 async function get_issues() {
     let response = await fetch(url);
 
@@ -26,40 +82,7 @@ async function get_issues() {
         var target = document.getElementById("items");
         document.getElementById("title").innerHTML = "Found " + json.total_count + " items";
         for (let item of json.items) {
-            var li = document.createElement("li");
-
-            var info = document.createElement("p");
-            let url_comps = item.repository_url.split("/").reverse();
-            let repo = url_comps[1] + "/" + url_comps[0];
-            info.innerHTML = "<strong>" + item.user.login
-                      + "</strong> for <a href=\"https://github.com/" + repo
-                      + "\" class=\"text-decoration-none\">"
-                      + repo + "</a>";
-            li.appendChild(info);
-
-            var title = document.createElement("p");
-            title.innerHTML = "<a href=\"" + item.html_url + "\">#"
-                      + item.number + "</a><a href=\"" + item.html_url
-                      + "\" class=\"text-reset text-decoration-none\"> "
-                      + item.title + "</a>";
-            li.appendChild(title);
-
-            var labels = document.createElement("p");
-            labels.innerHTML = "<small>Created: "
-                      + item.created_at.replace("T", " ").replace("Z", " UTC")
-                      + ", updated: "
-                      + item.updated_at.replace("T", " ").replace("Z", " UTC")
-                      + "</small>";
-            for (let lbl of item.labels) {
-                if (lbl.name != "ok-to-test") {
-                    labels.innerHTML += ", <span class=\"small\" style=\"color:#"
-                              + lbl.color + "\">"
-                              + lbl.name + "</span>";
-                }
-            }
-            li.appendChild(labels);
-
-            target.appendChild(li);
+            target.appendChild(render_item(item));
         }
     } else {
       alert("HTTP-Error: " + response.status);
