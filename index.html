@@ -9,6 +9,7 @@
     p { margin-bottom: 0 !important; }
     li { margin-bottom: 1rem !important; }
     h2 { text-align: center !important; }
+    footer { text-align: center !important; }
   </style>
 </head>
 <body class="bg-light" onload="get_issues()">
@@ -16,7 +17,7 @@
   <script language="javascript">
 async function get_issues() {
     let query =
-                "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc";
+                "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc+archived%3Afalse";
     let url =
            "https://api.github.com/search/issues?" + query;
     let response = await fetch(url);
@@ -64,11 +65,14 @@ async function get_issues() {
   </script>
 <div class="container">
   <main>
-    <div id="target" class="py-5 m-5">
+    <div id="target" class="py-3 m-3">
         <h2 id="title">Loading...</h2>
         <ul id="items"></ul>
     </div>
   </main>
+  <footer>
+      Edit me <a href="https://github.com/dtantsur/metal3-reviews">on github</a>
+  </footer>
 </div>
 </body>
 </html>
