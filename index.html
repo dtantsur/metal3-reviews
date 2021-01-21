@@ -80,7 +80,7 @@ async function get_issues() {
     if (response.ok) {
         let json = await response.json();
         var target = document.getElementById("items");
-        document.getElementById("title").innerHTML = "Found " + json.total_count + " items";
+        document.getElementById("title").innerHTML = json.total_count + " pull requests";
         for (let item of json.items) {
             target.appendChild(render_item(item));
         }
@@ -89,15 +89,16 @@ async function get_issues() {
     }
 }
   </script>
-<div class="container">
-  <main>
-    <div id="target" class="py-3 m-3">
+<div>
+  <main class="d-flex justify-content-center">
+    <div id="target" class="py-3">
         <h2 id="title">Loading...</h2>
         <ul id="items"></ul>
     </div>
   </main>
   <footer>
-      Edit me <a href="https://github.com/dtantsur/metal3-reviews">on github</a>
+    Dashboard by <a href="https://owlet.today">Dmitry Tantsur</a>.
+    Edit <a href="https://github.com/dtantsur/metal3-reviews">on github</a>.
   </footer>
 </div>
 </body>
