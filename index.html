@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <title>Metal3 review dashboard</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <style>
+    p { margin-bottom: 0 !important; }
+    li { margin-bottom: 1rem !important; }
+    h2 { text-align: center !important; }
+  </style>
+</head>
+<body class="bg-light" onload="get_issues()">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+  <script language="javascript">
+async function get_issues() {
+    let query =
+                "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc";
+    let url =
+           "https://api.github.com/search/issues?" + query;
+    let response = await fetch(url);
+
+    if (response.ok) {
+        let json = await response.json();
+        var target = document.getElementById("items");
+        document.getElementById("title").innerHTML = "Found " + json.total_count + " items";
+        for (let item of json.items) {
+            var li = document.createElement("li");
+
+            var info = document.createElement("p");
+            let url_comps = item.repository_url.split("/").reverse();
+            let repo = url_comps[1] + "/" + url_comps[0];
+            info.innerHTML = "<strong>" + item.user.login
+                      + "</strong> for <a href=\"https://github.com/" + repo + "\">"
+                      + repo + "</a>";
+            li.appendChild(info);
+
+            var title = document.createElement("p");
+            title.innerHTML = "<a href=\"" + item.html_url + "\">#" + item.id
+                      + "</a> " + item.title;
+            li.appendChild(title);
+
+            var labels = document.createElement("p");
+            labels.innerHTML = "Created: "
+                      + item.created_at.replace("T", " ").replace("Z", " UTC")
+                      + ", updated: "
+                      + item.updated_at.replace("T", " ").replace("Z", " UTC");
+            for (let lbl of item.labels) {
+                if (lbl.name != "ok-to-test") {
+                    labels.innerHTML += ", <span style=\"color:#"
+                              + lbl.color + "\">"
+                              + lbl.name + "</span>";
+                }
+            }
+            li.appendChild(labels);
+
+            target.appendChild(li);
+        }
+    } else {
+      alert("HTTP-Error: " + response.status);
+    }
+}
+  </script>
+<div class="container">
+  <main>
+    <div id="target" class="py-5 m-5">
+        <h2 id="title">Loading...</h2>
+        <ul id="items"></ul>
+    </div>
+  </main>
+</div>
+</body>
+</html>
