@@ -9,6 +9,7 @@
   <style>
     p { margin-bottom: 0 !important; }
     li { margin-bottom: 1rem !important; }
+    header { margin-bottom: 0.5rem !important; }
     h2 { text-align: center !important; }
     footer { text-align: center !important; }
   </style>
@@ -19,17 +20,6 @@
 let query = "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc+archived%3Afalse";
 let url = "https://api.github.com/search/issues?" + query;
 
-function render_item_heading(item) {
-    var info = document.createElement("p");
-    let url_comps = item.repository_url.split("/").reverse();
-    let repo = url_comps[1] + "/" + url_comps[0];
-    info.innerHTML = "<strong>" + item.user.login
-              + "</strong> for <a href=\"https://github.com/" + repo
-              + "\" class=\"text-decoration-none\">"
-              + repo + "</a>";
-    return info;
-}
-
 function render_item_link(item) {
     var text = item.title;
     let match = text.match(/^Bug #?([0-9]+): ?(.*)/);
@@ -38,7 +28,8 @@ function render_item_link(item) {
     }
 
     var title = document.createElement("p");
-    title.innerHTML = "<a href=\"" + item.html_url + "\">#"
+    title.innerHTML = "<strong>" + item.user.login
+              + ":</strong> <a href=\"" + item.html_url + "\">#"
               + item.number + "</a><a href=\"" + item.html_url
               + "\" class=\"text-reset text-decoration-none\"> "
               + text + "</a>";
@@ -69,10 +60,40 @@ function render_item_extras(item) {
 
 function render_item(item) {
     var li = document.createElement("li");
-    li.appendChild(render_item_heading(item));
     li.appendChild(render_item_link(item));
     li.appendChild(render_item_extras(item));
     return li;
+}
+
+
+function render_repo(repo, items) {
+    let section = document.createElement("section");
+    let subh = document.createElement("header");
+    subh.innerHTML = "<a href=\"https://github.com/" + repo
+          + "\" class=\"text-decoration-none\">" + repo + "</a>";
+    section.appendChild(subh);
+    for (let item of items) {
+        section.appendChild(render_item(item));
+    }
+    return section;
+}
+
+function render_response(json) {
+    var repos = {}
+    var target = document.getElementById("target");
+    for (var item of json.items) {
+        let url_comps = item.repository_url.split("/").reverse();
+        item.repo = url_comps[1] + "/" + url_comps[0];
+        if (!repos[item.repo]) {
+            repos[item.repo] = []
+        }
+        repos[item.repo].push(item)
+    }
+    document.getElementById("title").innerHTML = json.total_count + " pull requests";
+    let entries = Object.entries(repos).sort();
+    for (let [repo, items] of entries) {
+        target.appendChild(render_repo(repo, items));
+    }
 }
 
 async function get_issues() {
@@ -80,27 +101,20 @@ async function get_issues() {
 
     if (response.ok) {
         let json = await response.json();
-        var target = document.getElementById("items");
-        document.getElementById("title").innerHTML = json.total_count + " pull requests";
-        for (let item of json.items) {
-            target.appendChild(render_item(item));
-        }
+        render_response(json);
     } else {
       alert("HTTP-Error: " + response.status);
     }
 }
   </script>
-<div>
-  <main class="d-flex justify-content-center">
-    <div id="target" class="py-3">
-        <h2 id="title">Loading...</h2>
-        <ul id="items"></ul>
-    </div>
-  </main>
-  <footer>
-    Dashboard by <a href="https://owlet.today">Dmitry Tantsur</a>.
-    Edit <a href="https://github.com/dtantsur/metal3-reviews">on github</a>.
-  </footer>
-</div>
+<main class="d-flex justify-content-center">
+  <div id="target" class="py-3">
+      <h2 id="title">Loading...</h2>
+  </div>
+</main>
+<footer>
+  Dashboard by <a href="https://owlet.today">Dmitry Tantsur</a>.
+  Edit <a href="https://github.com/dtantsur/metal3-reviews">on github</a>.
+</footer>
 </body>
 </html>
