@@ -34,6 +34,7 @@ function render_item_link(item) {
     var text = item.title;
     let match = text.match(/^Bug #?([0-9]+): ?(.*)/);
     if (match) {
+        console.log("Item " + item.html_url + " contains bugzilla ID " + match[1]);
         text = match[2];
     }
 
@@ -88,18 +89,40 @@ function render_repo(repo, items) {
     return section;
 }
 
+function should_skip(item) {
+    var has_lgtm = false;
+    var has_approved = false;
+    for (let lbl of item.labels) {
+        if (lbl.name == "lgtm") {
+            has_lgtm = true;
+        }
+        if (lbl.name == "approved") {
+            has_approved = true;
+        }
+    }
+    return has_lgtm && has_approved;
+}
+
 function render_response(json) {
+    var count = json.total_count;
+    console.log("Initial list contains " + count + " items");
     var repos = {}
     var target = document.getElementById("target");
     for (var item of json.items) {
-        let url_comps = item.repository_url.split("/").reverse();
-        item.repo = url_comps[1] + "/" + url_comps[0];
-        if (!repos[item.repo]) {
-            repos[item.repo] = []
+        if (should_skip(item)) {
+            console.log("Skipping already approved item " + item.html_url);
+            count -= 1;
+        } else {
+            let url_comps = item.repository_url.split("/").reverse();
+            item.repo = url_comps[1] + "/" + url_comps[0];
+            if (!repos[item.repo]) {
+                repos[item.repo] = []
+            }
+            repos[item.repo].push(item)
         }
-        repos[item.repo].push(item)
     }
-    document.getElementById("title").innerHTML = json.total_count + " pull requests";
+    console.log("Rendering " + count + " items");
+    document.getElementById("title").innerHTML = count + " pull requests";
     let entries = Object.entries(repos).sort();
     for (let [repo, items] of entries) {
         target.appendChild(render_repo(repo, items));
@@ -108,6 +131,7 @@ function render_response(json) {
 
 async function get_issues() {
     document.getElementById("query").innerHTML = query.replace(/\+/g, " ");
+    console.log("Running query to github: " + query);
     let response = await fetch(url);
 
     if (response.ok) {
