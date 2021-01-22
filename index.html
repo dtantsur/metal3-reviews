@@ -17,7 +17,7 @@
 <body class="bg-light" onload="get_issues()">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
   <script language="javascript">
-let query = "type:pr+sort:updated-asc+"
+let query = "type:pr+sort:updated-desc+"
       // Organizations with all repositories:
       + "org:metal3-io+org:openshift-metal3+"
       // Hand-picked openshift repositories:
@@ -28,7 +28,7 @@ let query = "type:pr+sort:updated-asc+"
       // Excluding labels:
       + "-label:bugzilla/invalid-bug+-label:do-not-merge/work-in-progress+-label:do-not-merge/hold";
 
-let url = "https://api.github.com/search/issues?q=" + encodeURI(query);
+let url = "https://api.github.com/search/issues?per_page=100&q=" + encodeURI(query);
 
 function render_item_link(item) {
     var text = item.title;
@@ -103,12 +103,12 @@ function should_skip(item) {
     return has_lgtm && has_approved;
 }
 
-function render_response(json) {
-    var count = json.total_count;
+function render_response(items) {
+    var count = items.length;
     console.log("Initial list contains " + count + " items");
     var repos = {}
     var target = document.getElementById("target");
-    for (var item of json.items) {
+    for (var item of items) {
         if (should_skip(item)) {
             console.log("Skipping already approved item " + item.html_url);
             count -= 1;
@@ -132,14 +132,27 @@ function render_response(json) {
 async function get_issues() {
     document.getElementById("query").innerHTML = query.replace(/\+/g, " ");
     console.log("Running query to github: " + query);
-    let response = await fetch(url);
-
-    if (response.ok) {
-        let json = await response.json();
-        render_response(json);
-    } else {
-      alert("HTTP-Error: " + response.status);
+    var items = [];
+    var page = 1;
+    while (true) {
+        console.log("Requesting page " + page);
+        let response = await fetch(url + "&page=" + page);
+        if (response.ok) {
+            let json = await response.json();
+            console.log("Received " + json.items.length + " items");
+            if (json.items.length) {
+                items = items.concat(json.items);
+                page += 1;
+            } else {
+                break
+            }
+        } else {
+          console.log(response);
+          alert("HTTP-Error: " + response.status);
+          return;
+        }
     }
+    render_response(items);
 }
   </script>
 <main class="d-flex justify-content-center">
