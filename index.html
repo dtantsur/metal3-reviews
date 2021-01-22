@@ -17,8 +17,18 @@
 <body class="bg-light" onload="get_issues()">
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
   <script language="javascript">
-let query = "q=type%3Apr+org%3Ametal3-io+org%3Aopenshift-metal3+repo%3Aopenshift%2Fironic-image+repo%3Aopenshift%2Fironic-inspector-image+repo%3Aopenshift%2Fbaremetal-operator+repo%3Aopenshift%2Fcluster-baremetal-operator+is%3Aopen+-status%3Afailure+-label%3Abugzilla%2Finvalid-bug+-label%3Ado-not-merge%2Fwork-in-progress+-label%3Ado-not-merge%2Fhold+sort%3Aupdated-asc+archived%3Afalse";
-let url = "https://api.github.com/search/issues?" + query;
+let query = "type:pr+sort:updated-asc+"
+      // Organizations with all repositories:
+      + "org:metal3-io+org:openshift-metal3+"
+      // Hand-picked openshift repositories:
+      + "repo:openshift/ironic-image+repo:openshift/ironic-inspector-image+"
+      + "repo:openshift/baremetal-operator+repo:openshift/cluster-baremetal-operator+"
+      // Status filters:
+      + "is:open+-status:failure+archived:false+"
+      // Excluding labels:
+      + "-label:bugzilla/invalid-bug+-label:do-not-merge/work-in-progress+-label:do-not-merge/hold";
+
+let url = "https://api.github.com/search/issues?q=" + encodeURI(query);
 
 function render_item_link(item) {
     var text = item.title;
@@ -97,6 +107,7 @@ function render_response(json) {
 }
 
 async function get_issues() {
+    document.getElementById("query").innerHTML = query.replace(/\+/g, " ");
     let response = await fetch(url);
 
     if (response.ok) {
@@ -113,6 +124,10 @@ async function get_issues() {
   </div>
 </main>
 <footer>
+  <details>
+      <summary>Show query</summary>
+      <code id="query"></code>
+  </details>
   Dashboard by <a href="https://owlet.today">Dmitry Tantsur</a>.
   Edit <a href="https://github.com/dtantsur/metal3-reviews">on github</a>.
 </footer>
