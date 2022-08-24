@@ -21,11 +21,15 @@ let query = "type:pr+sort:updated-desc+"
       // Organizations with all repositories:
       + "org:metal3-io+org:openshift-metal3+"
       // Hand-picked openshift repositories:
-      + "repo:openshift/ironic-image+repo:openshift/ironic-inspector-image+"
-      + "repo:openshift/baremetal-operator+repo:openshift/cluster-baremetal-operator+"
+      + "repo:openshift/ironic-image+"
+      + "repo:openshift/ironic-inspector-image+"
+      + "repo:openshift/baremetal-operator+"
+      + "repo:openshift/cluster-baremetal-operator+"
+      + "repo:openshift/cluster-api-provider-baremetal+"
       + "repo:openshift/ironic-rhcos-downloader+"
       + "repo:openshift/ironic-agent-image+"
       + "repo:openshift/image-customization-controller+"
+      + "repo:openshift/machine-os-images+"
       // Status filters:
       + "is:open+-status:failure+archived:false+"
       // Excluding labels:
