@@ -29,16 +29,21 @@ let query = "type:pr+sort:updated-desc+"
       // Status filters:
       + "is:open+-status:failure+archived:false+"
       // Excluding labels:
-      + "-label:bugzilla/invalid-bug+-label:do-not-merge/work-in-progress+-label:do-not-merge/hold";
+      + "-label:do-not-merge/work-in-progress+-label:do-not-merge/hold";
 
 let url = "https://api.github.com/search/issues?per_page=100&q=" + encodeURI(query);
 
 function render_item_link(item) {
     var text = item.title;
-    let match = text.match(/^Bug #?([0-9]+): ?(.*)/);
-    if (match) {
-        console.log("Item " + item.html_url + " contains bugzilla ID " + match[1]);
-        text = match[2];
+    let bzmatch = text.match(/^Bug #?([0-9]+): ?(.*)/);
+    if (bzmatch) {
+        console.log("Item " + item.html_url + " contains bugzilla ID " + bzmatch[1]);
+        text = bzmatch[2];
+    }
+    let jiramatch = text.match(/^OCPBUGS-#?([0-9]+): ?(.*)/);
+    if (jiramatch) {
+        console.log("Item " + item.html_url + " contains jira ID " + jiramatch[1]);
+        text = jiramatch[2];
     }
 
     var title = document.createElement("p");
@@ -47,10 +52,15 @@ function render_item_link(item) {
               + item.number + "</a><a href=\"" + item.html_url
               + "\" class=\"text-reset text-decoration-none\"> "
               + text + "</a>";
-    if (match) {
+    if (bzmatch) {
         title.innerHTML += " <a class=\"small text-muted\" href=\""
               + "https://bugzilla.redhat.com/show_bug.cgi?id="
-              + match[1] + "\">[Bugzilla: " + match[1] + "]</a>";
+              + bzmatch[1] + "\">[Bugzilla: " + bzmatch[1] + "]</a>";
+    }
+    if (jiramatch) {
+        title.innerHTML += " <a class=\"small text-muted\" href=\""
+              + "https://issues.redhat.com/browse/OCPBUGS-"
+              + jiramatch[1] + "\">[Jira: " + jiramatch[1] + "]</a>";
     }
     return title;
 }
