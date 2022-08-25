@@ -40,6 +40,11 @@ body {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
 }
+
+a {
+    color: var(--bs-primary);
+}
+
 .bg-light {
     background-color: #f8f9fa;
 }
@@ -99,9 +104,5 @@ footer {
     .bg-light {
         background-color: var(--bs-gray-dark);
         color: var(--bs-gray);
-    }
-
-    a {
-        color: var(--bs-primary);
     }
 }
