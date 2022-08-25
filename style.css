@@ -41,7 +41,7 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 .bg-light {
-    background-color: #f8f9fa!important;
+    background-color: #f8f9fa;
 }
 
 .justify-content-center {
@@ -93,4 +93,15 @@ h2 {
 
 footer {
     text-align: center !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .bg-light {
+        background-color: var(--bs-gray-dark);
+        color: var(--bs-gray);
+    }
+
+    a {
+        color: var(--bs-primary);
+    }
 }
