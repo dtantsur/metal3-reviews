@@ -100,6 +100,10 @@ footer {
     text-align: center !important;
 }
 
+section li {
+    list-style: none;
+}
+
 @media (prefers-color-scheme: dark) {
     .bg-light {
         background-color: var(--bs-gray-dark);
