@@ -69,16 +69,23 @@ function render_item_link(item) {
 
 function render_item_extras(item) {
     var extras = document.createElement("p");
-    extras.innerHTML = "<small>Created: "
-              + item.created_at.replace("T", " ").replace("Z", " UTC")
-              + ", updated: "
-              + item.updated_at.replace("T", " ").replace("Z", " UTC")
-              + "</small>";
+    extras.className = "extras";
+    extras.innerHTML = "Created: "
+        + item.created_at.replace("T", " ").replace("Z", " UTC")
+        + ", updated: "
+        + item.updated_at.replace("T", " ").replace("Z", " UTC");
+    return extras;
+}
+
+function render_item_tags(item) {
+    var extras = document.createElement("p");
+    extras.className = "extras";
+    extras.innerHTML = "Labels: ";
     for (let lbl of item.labels) {
         if (!ignore_tags.includes(lbl.name)) {
-            extras.innerHTML += ", <span class=\"small\" style=\"color:#"
-                      + lbl.color + "\">"
-                      + lbl.name + "</span>";
+            extras.innerHTML += " <span style=\"color:#"
+                + lbl.color + "\">"
+                + lbl.name + "</span>";
         }
     }
     return extras;
@@ -88,6 +95,7 @@ function render_item(item) {
     var li = document.createElement("li");
     li.appendChild(render_item_link(item));
     li.appendChild(render_item_extras(item));
+    li.appendChild(render_item_tags(item));
     return li;
 }
 

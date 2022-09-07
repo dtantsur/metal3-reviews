@@ -109,6 +109,10 @@ section li {
     margin-left: 1rem !important;
 }
 
+.extras {
+    font-size: smaller;
+}
+
 @media (prefers-color-scheme: dark) {
     .bg-light {
         background-color: var(--bs-gray-dark);
