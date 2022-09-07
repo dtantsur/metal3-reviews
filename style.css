@@ -92,6 +92,10 @@ header {
     margin-bottom: 0.5rem !important;
 }
 
+header a {
+    text-decoration: none;
+}
+
 h2 {
     text-align: center !important;
 }
@@ -102,6 +106,7 @@ footer {
 
 section li {
     list-style: none;
+    margin-left: 1rem !important;
 }
 
 @media (prefers-color-scheme: dark) {

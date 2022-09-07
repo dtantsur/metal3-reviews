@@ -89,8 +89,8 @@ function render_item(item) {
 function render_repo(repo, items) {
     let section = document.createElement("section");
     let subh = document.createElement("header");
-    subh.innerHTML = "<a href=\"https://github.com/" + repo
-          + "\" class=\"text-decoration-none\">" + repo + "</a>";
+    subh.innerHTML = "<h3><a href=\"https://github.com/" + repo
+        + "\" class=\"text-decoration-none\">" + repo + "</a></h3>";
     section.appendChild(subh);
     for (let item of items) {
         section.appendChild(render_item(item));
