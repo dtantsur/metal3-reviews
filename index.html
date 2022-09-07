@@ -29,6 +29,12 @@ let query = "type:pr+sort:updated-desc+"
 
 let url = "https://api.github.com/search/issues?per_page=100&q=" + encodeURI(query);
 
+let ignore_tags = [
+    "ok-to-test",
+    "javascript",
+    "github_actions"
+];
+
 function render_item_link(item) {
     var text = item.title;
     let bzmatch = text.match(/^Bug #?([0-9]+): ?(.*)/);
@@ -69,7 +75,7 @@ function render_item_extras(item) {
               + item.updated_at.replace("T", " ").replace("Z", " UTC")
               + "</small>";
     for (let lbl of item.labels) {
-        if (lbl.name != "ok-to-test") {
+        if (!ignore_tags.includes(lbl.name)) {
             extras.innerHTML += ", <span class=\"small\" style=\"color:#"
                       + lbl.color + "\">"
                       + lbl.name + "</span>";
