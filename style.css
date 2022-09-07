@@ -62,6 +62,15 @@ a {
     padding-bottom: 1rem!important;
 }
 
+main {
+    clear: right;
+}
+
+#filters {
+    float: right;
+    margin-right: 1rem !important;
+}
+
 h2 {
     text-align: center !important;
 }

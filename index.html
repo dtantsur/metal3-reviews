@@ -7,7 +7,7 @@
   <link rel="shortcut icon" type="image/png" href="/favicon.png">
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-light" onload="get_issues()">
+<body class="bg-light" onload="init()">
   <script language="javascript">
 let query = "type:pr+sort:updated-desc+"
       // Organizations with all repositories:
@@ -113,25 +113,46 @@ function render_repo(repo, items) {
     return section;
 }
 
-function should_skip(item) {
-    var has_lgtm = false;
-    var has_approved = false;
-    for (let lbl of item.labels) {
-        if (lbl.name == "lgtm") {
-            has_lgtm = true;
-        }
-        if (lbl.name == "approved") {
-            has_approved = true;
-        }
+function current_filter() {
+    let hash = window.location.hash.replace("#", "");
+    if (hash) {
+        return hash;
+    } else {
+        return "all";
     }
-    return has_lgtm && has_approved;
 }
 
-function render_response(items) {
+function should_skip(item) {
+    let currentFilter = current_filter();
+    if (currentFilter == "openshift" || currentFilter == "need-cherry-pick-approved") {
+        if (!item.url.includes("openshift")) {
+            return true;
+        }
+    }
+
+    var labels = new Set();
+    for (let lbl of item.labels) {
+        labels.add(lbl.name);
+    }
+
+    if (currentFilter == "need-cherry-pick-approved" &&
+        (!labels.has("backport-risk-assessed") || labels.has("cherry-pick-approved"))) {
+            return true;
+    }
+
+    if (currentFilter == "need-ok-to-test" && !labels.has("needs-ok-to-test")) {
+        return true;
+    }
+
+    return labels.has("lgtm") && labels.has("approved");
+}
+
+function render_response() {
     var count = items.length;
     console.log("Initial list contains " + count + " items");
     var repos = {}
     var target = document.getElementById("target");
+    target.innerHTML = "";
     for (var item of items) {
         if (should_skip(item)) {
             console.log("Skipping already approved item " + item.html_url);
@@ -153,10 +174,28 @@ function render_response(items) {
     }
 }
 
+function setup_filters() {
+    var dropdown = document.getElementById("filter");
+    let currentFilter = current_filter();
+
+    for (var option of dropdown.options) {
+        if (option.value == currentFilter) {
+            option.selected = true;
+            break;
+        }
+    }
+
+    dropdown.addEventListener("change", e => {
+        window.location.hash = dropdown.value;
+        render_response();
+    })
+}
+
+var items = [];
+
 async function get_issues() {
-    document.getElementById("query").innerHTML = query.replace(/\+/g, " ");
     console.log("Running query to github: " + query);
-    var items = [];
+    document.getElementById("title").innerHTML = "Loading...";
     var page = 1;
     while (true) {
         console.log("Requesting page " + page);
@@ -176,12 +215,33 @@ async function get_issues() {
           return;
         }
     }
-    render_response(items);
+    render_response();
+}
+
+async function init() {
+    setup_filters();
+    document.getElementById("query").innerHTML = query.replace(/\+/g, " ");
+    await get_issues();
 }
   </script>
+<header>
+    <div></div>
+    <div id="filters">
+        <label>Filter:</label>
+        <select id="filter">
+            <option value="all" selected>All</option>
+            <option value="need-ok-to-test">Need ok-to-test</option>
+            <optgroup label="OpenShift">
+                <option value="openshift">All OpenShift</option>
+                <option value="need-cherry-pick-approved">Need cherry-pick-approved</option>
+            </optgroup>
+        </select>
+    </div>
+</header>
 <main class="d-flex justify-content-center">
-  <div id="target" class="py-3">
+  <div class="py-3">
       <h2 id="title">Loading...</h2>
+      <div id="target"></div>
   </div>
 </main>
 <footer>
