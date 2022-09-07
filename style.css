@@ -116,6 +116,7 @@ section li {
 .label {
     background-color: var(--bs-dark);
     border-radius: 0.5rem;
+    font-size: small;
     padding-top: 0.1rem;
     padding-bottom: 0.1rem;
     padding-left: 0.5rem;
