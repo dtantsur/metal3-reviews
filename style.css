@@ -80,8 +80,8 @@ h2 {
 }
 
 p {
-    margin-top: 0;
-    margin-bottom: 0 !important;
+    margin-top: 0.1rem;
+    margin-bottom: 0.1rem !important;
 }
 
 li {
