@@ -113,6 +113,15 @@ section li {
     font-size: smaller;
 }
 
+.label {
+    background-color: var(--bs-dark);
+    border-radius: 0.5rem;
+    padding-top: 0.1rem;
+    padding-bottom: 0.1rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
 @media (prefers-color-scheme: dark) {
     .bg-light {
         background-color: var(--bs-gray-dark);

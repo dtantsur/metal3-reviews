@@ -80,13 +80,14 @@ function render_item_extras(item) {
 function render_item_tags(item) {
     var extras = document.createElement("p");
     extras.className = "extras";
-    extras.innerHTML = "Labels: ";
-    for (let lbl of item.labels) {
-        if (!ignore_tags.includes(lbl.name)) {
-            extras.innerHTML += " <span style=\"color:#"
-                + lbl.color + "\">"
-                + lbl.name + "</span>";
-        }
+    var labels = item.labels.filter(l => !ignore_tags.includes(l.name));
+    if (labels.length == 0) {
+        return extras;
+    }
+    for (let lbl of labels) {
+        extras.innerHTML += " <span class=\"label\" style=\"color:#"
+            + lbl.color + "\">"
+            + lbl.name + "</span>";
     }
     return extras;
 }
