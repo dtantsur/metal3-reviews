@@ -135,13 +135,12 @@ function should_skip(item) {
         labels.add(lbl.name);
     }
 
-    if (currentFilter == "need-cherry-pick-approved" &&
-        (!labels.has("backport-risk-assessed") || labels.has("cherry-pick-approved"))) {
-            return true;
+    if (currentFilter == "need-cherry-pick-approved") {
+        return !labels.has("backport-risk-assessed") || labels.has("cherry-pick-approved");
     }
 
-    if (currentFilter == "need-ok-to-test" && !labels.has("needs-ok-to-test")) {
-        return true;
+    if (currentFilter == "need-ok-to-test") {
+        return !labels.has("needs-ok-to-test");
     }
 
     return labels.has("lgtm") && labels.has("approved");
